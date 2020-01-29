@@ -1,14 +1,22 @@
+# Imports
 from tkinter import *
 from tkinter import messagebox
 import tkinter.messagebox
 
 
-# ****** GLOBAL VARIABLES ******
+
+# Global Variables
 
 objects = []
 window = Tk()
 window.withdraw()
-window.title('Email Storage')
+window.title('Password Storage')
+window.geometry('{}x{}'.format(400, 400))
+demoPassword = 'demopassword'  # SET DEMO PASSWORD HERE
+window.grid_columnconfigure((0, 1, 2), weight=1)
+
+
+
 
 class popupWindow(object):
 
@@ -18,32 +26,35 @@ class popupWindow(object):
     def __init__(self, master):
         top = self.top = Toplevel(master)
         top.title('Input Password')
-        top.geometry('{}x{}'.format(250, 100))
+        top.geometry('{}x{}'.format(400, 100))
         top.resizable(width=False, height=False)
-        self.l = Label(top, text=" Password: ", font=('Courier', 14), justify=CENTER)
-        self.l.pack()
+        top.configure(background="powderblue")
+
         self.e = Entry(top, show='*', width=30)
         self.e.pack(pady=7)
-        self.b = Button(top, text='Submit', command=self.cleanup, font=('Courier', 14))
+        self.b = Button(top, text='Submit', command=self.cleanup, font=('system', 14))
         self.b.pack()
+        self.l = Label(top, text=" Password: ", font=('system', 14), justify=CENTER)
+
 
     def cleanup(self):
         self.value = self.e.get()
-        access = 'tim'
+        access = demoPassword
 
         if self.value == access:
-            self.loop = True
             self.top.destroy()
+            self.loop = True
             window.deiconify()
         else:
             self.attempts += 1
             if self.attempts == 5:
                 window.quit()
             self.e .delete(0, 'end')
-            messagebox.showerror('Incorrect Password', 'Incorrect password, attempts remaining: ' + str(5 - self.attempts))
+            messagebox.showerror('Incorrect Password', 'That password was incorrect. Please try again. Attempts '
+                                                       'remaining: ' + str(5 - self.attempts))
 
-class entity_add:
 
+class addEntity:
     def __init__(self, master, n, p, e):
         self.password = p
         self.name = n
@@ -81,7 +92,7 @@ class entity_add:
         f.close()
 
 
-class entity_display:
+class displayPasswords:
 
     def __init__(self, master, n, e, p, i):
         self.password = p
@@ -111,9 +122,9 @@ class entity_display:
             else:
                 dencryptedP += chr(ord(letter) - 5)
 
-        self.label_name = Label(self.window, text=dencryptedN, font=('Courier', 14))
-        self.label_email = Label(self.window, text=dencryptedE, font=('Courier', 14))
-        self.label_pass = Label(self.window, text=dencryptedP, font=('Courier', 14))
+        self.label_name = Label(self.window, text=dencryptedN, font=('system', 14))
+        self.label_email = Label(self.window, text=dencryptedE, font=('system', 14))
+        self.label_pass = Label(self.window, text=dencryptedP, font=('system', 14))
         self.deleteButton = Button(self.window, text='X', fg='red', command=self.delete)
 
     def display(self):
@@ -124,7 +135,6 @@ class entity_display:
 
     def delete(self):
         answer = tkinter.messagebox.askquestion('Delete', 'Are you sure you want to delete this entry?')
-
         if answer == 'yes':
             for i in objects:
                 i.destroy()
@@ -151,14 +161,14 @@ class entity_display:
         self.deleteButton.destroy()
 
 
-# ******* FUNCTIONS *********
+# Internal Functions
 
 
 def onsubmit():
     m = email.get()
     p = password.get()
     n = name.get()
-    e = entity_add(window, n, p, m)
+    e = addEntity(window, n, p, m)
     e.write()
     name.delete(0, 'end')
     email.delete(0, 'end')
@@ -178,45 +188,54 @@ def readfile():
 
     for line in f:
         entityList = line.split(',')
-        e = entity_display(window, entityList[0], entityList[1], entityList[2], count)
+        e = displayPasswords(window, entityList[0], entityList[1], entityList[2], count)
         objects.append(e)
         e.display()
         count += 1
     f.close()
 
+def close():
+    if messagebox.askokcancel("Quit", "Are you sure you want to quit?"):
+        window.destroy()
+    else:
+        window.mainloop()
 
-# ******* GRAPHICS *********
+# GUI
 
 m = popupWindow(window)
 
-entity_label = Label(window, text='Add Entity', font=('Courier', 18))
-name_label = Label(window, text='Name: ', font=('Courier', 14))
-email_label = Label(window, text='Email: ', font=('Courier', 14))
-pass_label = Label(window, text='Password: ', font=('Courier', 14))
-name = Entry(window, font=('Courier', 14))
-email = Entry(window, font=('Courier', 14))
-password = Entry(window, show='*', font=('Courier', 14))
-submit = Button(window, text='Add Email', command=onsubmit, font=('Courier', 14))
 
-entity_label.grid(columnspan=3, row=0)
-name_label.grid(row=1, sticky=E, padx=3)
-email_label.grid(row=2, sticky=E, padx=3)
-pass_label.grid(row=3, sticky=E, padx=3)
+label = Label(window, text='Passwords', font='verdana 18 bold')
 
-name.grid(columnspan=3, row=1, column=1, padx=2, pady=2, sticky=W)
-email.grid(columnspan=3, row=2, column=1, padx=2, pady=2, sticky=W)
-password.grid(columnspan=3, row=3, column=1, padx=2, pady=2, sticky=W)
 
-submit.grid(columnspan=3, pady=4)
+nameHeader = Label(window,  text='Website Name: ', font=('system', 14))
+emailHeader = Label(window,  text='Email: ', font=('system', 14))
+passwordHeader = Label(window,  text='Password: ', font=('system', 14))
 
-name_label2 = Label(window, text='Name: ', font=('Courier', 14))
-email_label2 = Label(window, text='Email: ', font=('Courier', 14))
-pass_label2 = Label(window, text='Password: ', font=('Courier', 14))
+name = Entry(window, font=('system', 14))
+email = Entry(window, font=('system', 14))
+password = Entry(window, show='*', font=('system', 14))
+submit = Button(window, text='Store Password', command=onsubmit, font=('system', 14))
 
-name_label2.grid(row=5)
-email_label2.grid(row=5, column=1)
-pass_label2.grid(row=5, column=2)
+label.grid(column=1, row=0, sticky='ew')
+nameHeader.grid(row=1, sticky=E, padx=3)
+emailHeader.grid(row=2, sticky=E, padx=3)
+passwordHeader.grid(row=3, sticky=E, padx=3)
+
+name.grid(column=1, columnspan=2, row=1, padx=2, pady=2, sticky='ew')
+email.grid(columnspan=2, row=2, column=1, padx=2, pady=2, sticky='ew')
+password.grid(columnspan=2, row=3, column=1, padx=2, pady=2, sticky='ew')
+submit.grid(column=1, pady=4, sticky='ew')
+
+nameHeader2 = Label(window, text='Website Name: ', font=('system', 14))
+emailHeader2 = Label(window,  text='Email: ', font=('system', 14))
+passHeader2 = Label(window, text='Password: ', font=('system', 14))
+
+nameHeader2.grid(row=5)
+emailHeader2.grid(row=5, column=1)
+passHeader2.grid(row=5, column=2)
 
 readfile()
+
 
 window.mainloop()
